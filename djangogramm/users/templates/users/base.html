@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link type="text/css" href="{% static 'users/css/styles.css' %}" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link rel="shortcut icon" href="{% static 'users/images/ico_2.png' %}" type="image/x-icon"/>
+    <meta name="viewport" content="width=768px, maximum-scale=1.0,
+minimum-scale=0.25"/>
+</head>
+<body>
+
+<table class="table-page" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td valign="top">
+            {% block mainmenu %}
+
+                <div class="header">
+                    <ul id="mainmenu" class="mainmenu">
+                        <li class="logo"><a href="{% url 'home' %}">
+                            <div class="logo"></div>
+                        </a></li>
+
+                        {% for m in menu %}
+                            <li><a href="{% url m.url_name %}">{{ m.title }}</a></li>
+
+                        {% endfor %}
+                        {% if search %}
+                            <li class="d1">
+                                <form class="search-form" action="{% url 'home' %}">
+                                    <input type="text" placeholder="Искать здесь..." name="search">
+                                    <button type="submit"></button>
+                                </form>
+                            </li>
+                        {% endif %}
+                        {% if request.user.is_authenticated %}
+                            <li class="last"> {{ user.username }} | <a href="{% url 'logout' %}">Выйти</a></li>
+                        {% else %}
+                            <li class="last"><a href="{% url 'register' %}">Регистрация</a> | <a
+                                    href="{% url 'login' %}">Войти</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endblock mainmenu %}
+            <div class="center">
+
+                {% block content %}
+                {% endblock %}
+            </div>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

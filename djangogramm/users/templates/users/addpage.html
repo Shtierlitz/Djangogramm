@@ -1,0 +1,30 @@
+{% extends 'users/base.html' %}
+{% block content %}
+    <h1>{{ title }}</h1>
+
+    <form action="{% url 'add_page' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="'form-error">{{ form.non_field_errors }}</div>
+
+        <p><label class="form-label"
+                  for="{{ image.image.id_for_label }}">{{ image.image.label }}: </label>{{ image.image }}
+        </p>
+        <div class="form-error">{{ image.image.errors }}</div>
+
+        <p><label class="form-label"
+                  for="{{ form.title.id_for_label }}">{{ form.title.label }}: </label>{{ form.title }}</p>
+        <div class="form-error">{{ form.title.errors }}</div>
+
+        <p><label class="form-label"
+                  for="{{ form.text.id_for_label }}">{{ form.text.label }}: </label>{{ form.text }}</p>
+        <div class="form-error">{{ form.text.errors }}</div>
+
+        <p><label class="form-label"
+                  for="{{ tags.tag_title.id_for_label }}">{{ tags.tag_title.label }}: </label>{{ tags.tag_title }} Теги разделяются запятыми.</p>
+        <div class="form-error">{{ tags.tag_title.errors }}</div>
+
+
+        <button type="submit">Добавить</button>
+    </form>
+
+{% endblock %}

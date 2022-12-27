@@ -1,0 +1,38 @@
+{% extends 'users/base.html' %}
+
+
+{% block content %}
+
+    <h1>{{ title }}</h1>
+
+    <form action="{% url 'change_profile' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-error">{{ form.non_field_errors }}</div>
+
+        <p><label class="form-label"
+                  for="{{ form.username.id_for_label }}">{{ form.username.label }}: </label>{{ form.username }}</p>
+        <div class="form-error">{{ form.username.errors }}</div>
+
+        <p><label class="form-label"
+                  for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}: </label>{{ form.first_name }}</p>
+        <div class="form-error">{{ form.first_name.errors }}</div>
+
+        <p><label class="form-label"
+                  for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}: </label>{{ form.last_name }}</p>
+        <div class="form-error">{{ form.last_name.errors }}</div>
+
+        <p><label class="form-label"
+                  for="{{ form.avatar.id_for_label }}">{{ form.avatar.label }}: </label>{{ form.avatar }}</p>
+        {% if image %}
+        <p><img alt="Загрузите фото" src="{{ image.url }}" width="150px" height="150px"></p>
+        {% endif %}
+        <div class="form-error">{{ from.avatar.errors }}</div>
+
+        <p><label class="form-label"
+                  for="{{ form.about.id_for_label }}">{{ form.about.label }}: </label>{{ form.about }}</p>
+        <div class="form-error">{{ form.about.errors }}</div>
+
+        <button type="submit">Добавить</button>
+    </form>
+
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'users/base.html' %}
+{% load help_tags %}
+
+
+
+{% block content %}
+    <ul class="list-articles">
+
+
+        {% for p in posts %}
+            {% user_post p.user.id as users_post %}
+            {% post_image p.id post_1=True as image_list %}
+            <div>
+
+                    <div class="article-panel">
+                        <p class="first">User: {{ users_post }}</p>
+                        <p class="last">Date: {{ p.time_update|date:"d-m-Y H:i:s" }}</p>
+                    </div>
+
+                    <h2><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></h2>
+                    <!--фото поста-->
+                    {% if image_list %}
+                        <p>
+                            <img class="img-article-left" alt="post image" src="{{ image_list.resized_image.url }}">
+                        </p>
+
+                    {% endif %}
+                    <p>{{ p.text|linebreaks|truncatewords:50 }}</p>
+                    <p>
+
+
+                    <div class="post_footer">
+                        {% include 'likes/includes/add_like.html' with post_id=p.pk %}
+                        <div class="tags-footer">
+                                {% for t in p.tags.all %}
+
+                                    <li class="tags-footer-li">{{ t }}</li>
+
+                                {% endfor %}
+                        </div>
+                    </div>
+
+                <p>
+
+            </div>
+
+        {% endfor %}
+    </ul>
+
+{% endblock %}
+
+
