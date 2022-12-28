@@ -57,7 +57,7 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
+#*.log
 local_settings.py
 
 
@@ -137,4 +137,4 @@ dmypy.json
 *.bak
 
 #Database
-.sqlite3
+*.sqlite3
