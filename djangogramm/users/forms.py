@@ -7,7 +7,7 @@ from django.forms import widgets
 from .models import Post, Image, Tag
 from .utils import send_email_verify, tag_creator
 from django.utils.translation import gettext_lazy as _
-from captcha.fields import CaptchaField
+from captcha.fields import CaptchaField, CaptchaTextInput
 
 User = get_user_model()
 
@@ -22,28 +22,6 @@ class AddPostForm(forms.ModelForm):
         if len(title) > 50:
             raise ValidationError('Длинна превышает 50 символов')
         return title
-
-
-class ImageForm(forms.Form):
-    image = forms.ImageField(widget=widgets.FileInput(attrs={'multiple': 'multiple'}))
-
-    def __init__(self, *args, **kwargs):
-        if 'request' in kwargs:
-            self.request = kwargs.pop('request')
-        super(ImageForm, self).__init__(*args, **kwargs)
-
-    def clean_image(self):
-        # Остаются только картинки
-        image = [i for i in self.request.FILES.getlist('image') if 'image' in i.content_type]
-        # Если среди загруженных файлов картинок нет, то исключение
-        if len(image) == 0:
-            raise forms.ValidationError(u'Not found uploaded photos.')
-        return image
-
-    def save_for(self, post):
-        for image in self.cleaned_data['image']:
-            to_save = Image(image=image, resized_image=image, post_id=post)
-            to_save.save()
 
 
 class TagForm(forms.Form):
@@ -78,10 +56,49 @@ class TagForm(forms.Form):
             post.tags.add(to_save)
 
 
+class ImageForm(forms.Form):
+    image = forms.ImageField(widget=widgets.FileInput(attrs={'multiple': 'multiple'}))
+
+    def __init__(self, *args, **kwargs):
+        if 'request' in kwargs:
+            self.request = kwargs.pop('request')
+        super(ImageForm, self).__init__(*args, **kwargs)
+
+    def clean_image(self):
+        # Остаются только картинки
+        image = [i for i in self.request.FILES.getlist('image') if 'image' in i.content_type]
+        # Если среди загруженных файлов картинок нет, то исключение
+        if len(image) == 0:
+            raise forms.ValidationError(u'Not found uploaded photos.')
+        return image
+
+    def save_for(self, post, user):
+        for image in self.cleaned_data['image']:
+            to_save = Image(image=image, resized_image=image, post_id=post, user_id=user)
+            to_save.save()
+
+
 class ChangeProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'avatar', 'about']
+
+    def save_with_slug(self, commit=True):
+        """Override the save method to add an automatic slug."""
+        if self.errors:
+            raise ValueError(
+                "The %s could not be %s because the data didn't validate." % (
+                    self.instance._meta.object_name,
+                    'created' if self.instance._state.adding else 'changed',
+                )
+            )
+        if commit:
+            self.instance.slug = self.cleaned_data['username'].lower()
+            self.instance.save()
+            self._save_m2m()
+        else:
+            self.save_m2m = self._save_m2m
+        return self.instance
 
 
 class RegisterForm(UserCreationForm):
@@ -94,6 +111,16 @@ class RegisterForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ['username', 'email']
+
+    def save_with_slag(self, commit=True):
+        """Override the save method to add an automatic slug."""
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+
+        if commit:
+            user.slug = self.cleaned_data['username'].lower()
+            user.save()
+        return user
 
 
 class LoginForm(AuthenticationForm):
@@ -143,4 +170,4 @@ class ContactForm(forms.Form):
         label="Введите текст",
         widget=forms.Textarea(attrs={'cols': 39, 'rows': 5, 'placeholder': 'Сообщение'}))
 
-    captcha = CaptchaField(label="Капча")
+    captcha = CaptchaField(widget=CaptchaTextInput(attrs={'class': 'form-control'}), label="Капча")

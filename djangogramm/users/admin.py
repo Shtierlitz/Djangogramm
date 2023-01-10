@@ -18,36 +18,14 @@ class UsersAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2'),
+            'fields': ('username', 'email', 'password1', 'password2', 'slug'),
         }),
     )
     add_form = RegisterForm
+    prepopulated_fields = {'slug': ('username',)}
     # list_display = ('id', "username", 'first_name', 'last_name', 'avatar', 'about', 'email')
     # list_display_links = ('id', 'username')
     # search_fields = ('username', 'last_name')
-
-
-# class PostResource(resources.ModelResource):
-#     class Meta:
-#         model = Post
-#         fields = ['id', 'title', 'time_create', 'user', 'is_published']
-#
-#
-# class PostAdmin(ImportExportActionModelAdmin):
-#     resource_class = PostResource
-#     list_display = [i for i in PostResource._meta.fields]
-#     search_fields = ['id', 'title']
-#
-#
-# class ImageResource(resources.ModelResource):
-#     class Meta:
-#         model = Image
-#         fields = ['id', 'image']
-#
-#
-# class ImageAdmin(ImportExportActionModelAdmin):
-#     resource_class = ImageResource
-#     list_display = [i for i in ImageResource._meta.fields]
 
 
 class PostAdmin(admin.ModelAdmin):

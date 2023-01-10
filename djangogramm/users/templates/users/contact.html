@@ -1,19 +1,73 @@
 {% extends 'users/base.html' %}
 
 {% block content %}
-<h1>{{title}}</h1>
 
-<form method="post" action="">
-    {% csrf_token %}
-    <div class="form-error">{{ form.non_field_errors }}</div>
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="card">
+                <div class="well well-sm">
+                    <form class="form-horizontal" action="" method="post">
+                        {% csrf_token %}
+                            <legend class="text-center">{{ title }}</legend>
+                            <div class="form-error">{{ form.non_field_errors }}</div>
+                            <!-- Name input-->
+                            <div class="form-group">
 
-    {% for f in form %}
-    <p><label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}</p>
-    <div class="form-error">{{ f.errors }}</div>
-    {% endfor %}
+                                <label class="col-md-3 control-label"
+                                       for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
 
-    <button type="submit">Отправить</button>
-</form>
+                                <div class="col-md-9">
+                                    <input id="name" name="name" type="text" placeholder="Ваше Имя"
+                                           class="form-control">
+                                </div>
+                                <div class="form-error">{{ form.name.errors }}</div>
+                            </div>
 
+                            <!-- Email input-->
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"
+                                       for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                                <div class="col-md-9">
+
+                                    <input id="email" name="email" type="text" placeholder="Your email"
+                                           class="form-control">
+                                </div>
+                                <div class="form-error">{{ form.email.errors }}</div>
+                            </div>
+
+                            <!-- Message body -->
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"
+                                       for="{{ form.content.id_for_label }}">{{ form.content.label }}</label>
+                                <div class="col-md-9">
+
+                                    <textarea class="form-control" id="content" name="content"
+                                              placeholder="Напишите свое сообщение здесь..." rows="5"></textarea>
+                                </div>
+                                <div class="form-error">{{ form.content.errors }}</div>
+                            </div>
+
+                            <!-- Captcha -->
+                            <div class="form-group-captcha">
+                                <label class="col-md-3 control-label"
+                                       for="{{ form.captcha.id_for_label }}">{{ form.captcha.label }}</label>{{ form.captcha }}
+                                <div class="col-md-9">
+
+                                </div>
+                                <div class="form-error">{{ form.captcha.errors }}</div>
+                            </div>
+
+                            <!-- Form actions -->
+                            <div class="form-group">
+                                <div class="col-md-12 text-right">
+                                    <button type="submit" class="btn btn-primary btn-lg">Отправить</button>
+                                </div>
+                            </div>
+                    </form>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}

@@ -33,8 +33,12 @@ class TestViews(TestCase):
     def setUp(self):
         self.client = Client()
         self.user1 = User.objects.create_user(username='test_username_1', first_name='test_first_name_1',
-                                              last_name='test_last_name_1', about='test_about_1', email_verify=True,
+                                              last_name='test_last_name_1', slug='test_slug', about='test_about_1', email_verify=True,
                                               password='test_password')
+        self.user2 = User.objects.create_user(username='test_username_2', first_name='test_first_name_2',
+                                              last_name='test_last_name_', slug='test_slug_2', about='test_about_2',
+                                              email_verify=True,
+                                              password='test_password_2')
         self.post1 = Post.objects.create(title='title_test_1', text='text_test_1', user=self.user1)
         self.client.login(username='test_username_1', password='test_password')
 
@@ -44,11 +48,19 @@ class TestViews(TestCase):
         assert response.headers['Content-Type'] == 'text/html; charset=utf-8'
         self.assertTemplateUsed(response, 'users/index.html')
 
-    def test_ShowPost(self):
+    def test_ShowPost_get(self):
         response = self.client.get(reverse('post', args=[1]))
         assert response.status_code == 200
         assert response.headers['Content-Type'] == 'text/html; charset=utf-8'
         self.assertTemplateUsed(response, 'users/post.html')
+
+    def test_ShowPost_post(self):
+        self.post2 = Post.objects.create(title='title_test_2', text='text_test_2', user=self.user1)
+        assert len(Post.objects.all()) == 2
+        response = self.client.post(reverse('post', args=[2]), {'delete': 1})
+        self.assertEqual(response.status_code, 302)
+        assert len(Post.objects.all()) == 1
+
 
     def test_AboutSite(self):
         response = self.client.get(reverse('about'))
@@ -71,7 +83,7 @@ class TestViews(TestCase):
     def test_ChangeProfile_post(self):
         self.image = self.get_image_file(name='test3.png')
         response = self.client.post(reverse('change_profile'), {
-            'username': 'test_username',
+            'username': 'Test_username',
             'first_name': 'test_first_name',
             'last_name': 'test_last_name',
             'avatar': self.image,
@@ -79,11 +91,12 @@ class TestViews(TestCase):
         })
         test_user = User.objects.get(pk=1)
         assert response.status_code == 302
-        self.assertEqual(test_user.username, 'test_username')
+        self.assertEqual(test_user.username, 'Test_username')
         self.assertEqual(test_user.first_name, 'test_first_name')
         self.assertEqual(test_user.last_name, 'test_last_name')
         self.assertEqual(test_user.avatar, 'photos/users/test3.png')
         self.assertEqual(test_user.about, 'test_about')
+        self.assertEqual(test_user.slug, 'test_username')
 
     def test_ChangeProfile_post_no_data(self):
         response = self.client.post(reverse('change_profile'))
@@ -192,3 +205,39 @@ class TestViews(TestCase):
         response = self.client.post(reverse('remove'), data=dict(likes_id=1, like=True, url_form='home'))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(Like.objects.all()), 0)
+
+    def test_Followers(self):
+        response = self.client.get(reverse('followers', args=[1]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'users/followers.html')
+
+    def test_Follows(self):
+        response = self.client.get(reverse('follows', args=[1]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'users/follows.html')
+
+    def test_ForeignProfile_get(self):
+        slug = User.objects.get(pk=1).slug
+        response = self.client.get(reverse('foreign_profile', args=[slug]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'users/foreign_profile.html')
+
+    def test_ForeignProfile_post_subscribe(self):
+        test_user_2 = User.objects.get(pk=2)
+        response = self.client.post(reverse('foreign_profile', args=[test_user_2.slug]), {
+            'subscribe': 1
+        })
+        self.assertEqual(response.status_code, 302)
+        assert len(test_user_2.follows.all()) == 1
+
+    def test_ForeignProfile_post_unsubscribe(self):
+        test_user = User.objects.get(pk=1)
+        test_user_2 = User.objects.get(pk=2)
+        test_user_2.follows.add(test_user)
+        response = self.client.post(reverse('foreign_profile', args=[test_user_2.slug]), {
+            'unsubscribe': 1
+        })
+        self.assertEqual(response.status_code, 302)
+        assert len(test_user_2.follows.all()) == 0
+
+

@@ -3,36 +3,91 @@
 
 {% block content %}
 
-    <h1>{{ title }}</h1>
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="card">
+                <div class="well well-sm">
 
-    <form action="{% url 'change_profile' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="form-error">{{ form.non_field_errors }}</div>
+                    <form class="form-horizontal" action="{% url 'change_profile' %}" method="post"
+                          enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <legend class="text-center">{{ title }}</legend>
+                        {% if image %}
+                            <div class="change-profile-avatar">
+                                <img class='img-fluid img-thumbnail mt-4 mb-lg-4' alt="Загрузите фото"
+                                     src="{{ image.url }}" width="150px" height="150px">
+                            </div>
+                        {% endif %}
 
-        <p><label class="form-label"
-                  for="{{ form.username.id_for_label }}">{{ form.username.label }}: </label>{{ form.username }}</p>
-        <div class="form-error">{{ form.username.errors }}</div>
+                        <div class="form-error">{{ form.non_field_errors }}</div>
 
-        <p><label class="form-label"
-                  for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}: </label>{{ form.first_name }}</p>
-        <div class="form-error">{{ form.first_name.errors }}</div>
+                        <!-- Form username -->
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"
+                                   for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                            <div class="col-md-9">
+                                <input id="username" name="username" type="text"
+                                       placeholder="{{ form.initial.username }}"
+                                       class="form-control">
+                            </div>
+                            <div class="form-error">{{ form.username.errors }}</div>
+                        </div>
+                        <br>
+                        <!-- Form first_name -->
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"
+                                   for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                            <div class="col-md-9">
+                                <input id="first_name" name="first_name" type="text"
+                                       placeholder="{{ form.initial.first_name }}"
+                                       class="form-control">
+                            </div>
+                            <div class="form-error">{{ form.first_name.errors }}</div>
+                        </div>
+                        <br>
+                        <!-- Form last_name -->
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"
+                                   for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                            <div class="col-md-9">
+                                <input id="last_name" name="last_name" type="text"
+                                       placeholder="{{ form.initial.last_name }}"
+                                       class="form-control">
+                            </div>
+                            <div class="form-error">{{ form.last_name.errors }}</div>
+                        </div>
+                        <br>
+                        <!-- Form avatar -->
+                        <label class="form-label"
+                               for="{{ form.avatar.id_for_label }}">{{ form.avatar.label }}: </label>{{ form.avatar }}
+                        <div class="form-error">{{ from.avatar.errors }}</div>
+                        <br>
+                        <!-- Form about -->
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"
+                                   for="{{ form.about.id_for_label }}">{{ form.about.label }}: </label>
+                            <div class="col-md-9">
+                                    <textarea class="form-control" id="text" name="about"
+                                              placeholder="{{ form.initial.about }}" rows="5"></textarea>
+                            </div>
+                            <div class="form-error">{{ form.about.errors }}</div>
+                        </div>
+                        <br>
+                        <!-- Form actions -->
+                        <div class="form-group">
+                            <div class="col-md-12 text-right">
+                                <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
+                                style="z-index: 1;">
+                            Добавить
+                        </button>
+                            </div>
+                        </div>
+                        <br>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <p><label class="form-label"
-                  for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}: </label>{{ form.last_name }}</p>
-        <div class="form-error">{{ form.last_name.errors }}</div>
-
-        <p><label class="form-label"
-                  for="{{ form.avatar.id_for_label }}">{{ form.avatar.label }}: </label>{{ form.avatar }}</p>
-        {% if image %}
-        <p><img alt="Загрузите фото" src="{{ image.url }}" width="150px" height="150px"></p>
-        {% endif %}
-        <div class="form-error">{{ from.avatar.errors }}</div>
-
-        <p><label class="form-label"
-                  for="{{ form.about.id_for_label }}">{{ form.about.label }}: </label>{{ form.about }}</p>
-        <div class="form-error">{{ form.about.errors }}</div>
-
-        <button type="submit">Добавить</button>
-    </form>
 
 {% endblock %}

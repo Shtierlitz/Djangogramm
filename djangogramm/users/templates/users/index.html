@@ -4,48 +4,72 @@
 
 
 {% block content %}
-    <ul class="list-articles">
 
+    <div class="container bootstrap snippets bootdey">
+    <br>
+        <div class="row">
+            <h2 class="text-muted" style="text-align: center">Добро пожаловать в блог Djangogramm</h2>
+            <hr>
+            <br>
+        </div>
 
-        {% for p in posts %}
-            {% user_post p.user.id as users_post %}
-            {% post_image p.id post_1=True as image_list %}
-            <div>
+        <div class="row">
+            <!-- posts -->
+            <div class="col-md-8">
+                {% for p in posts %}
+                    {% user_post p.user.id as users_post %}
+                    {% post_image p.id post_1=True as image_list %}
+                    <div class="row">
+                        <div class="col-sm-6 mb-3 mb-sm-0">
+                            <div class="card" style="width: 200%">
+                                <div class="card-body">
+                                    <div class="panel blog-container">
+                                        <div class="panel-body">
+                                        <h3><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></h3>
+                                            <br>
+                                            <div class="image-wrapper">
+                                                {% if image_list %}
+                                                    <img src="{{ image_list.resized_image.url }}" alt="Photo of Blog">
+                                                    <div class="image-overlay"></div>
+                                                {% endif %}
+                                                <br>
+                                                <br>
+                                            </div>
 
-                    <div class="article-panel">
-                        <p class="first">User: {{ users_post }}</p>
-                        <p class="last">Date: {{ p.time_update|date:"d-m-Y H:i:s" }}</p>
-                    </div>
+                                            {% if request.user.is_authenticated %}
+                                                {% if users_post == request.user %}
+                                                    <small class="text-muted">By <a
+                                                            href="{% url 'user' %}"><strong> {{ users_post }}</strong></a>
+                                                        | Date:
+                                                        {{ p.time_update|date:"d-m-Y H:i:s" }}</small>
+                                                {% else %}
+                                                    <small class="text-muted">By <a
+                                                            href="{{ users_post.get_absolute_url }}"><strong> {{ users_post }}</strong></a>
+                                                        | Date: {{ p.time_update|date:"d-m-Y H:i:s" }}</small>
+                                                {% endif %}
+                                            {% else %}
+                                                <small class="text-muted">By <strong> {{ users_post }}</strong> | Date:
+                                                    {{ p.time_update|date:"d-m-Y H:i:s" }}</small>
+                                            {% endif %}
 
-                    <h2><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></h2>
-                    <!--фото поста-->
-                    {% if image_list %}
-                        <p>
-                            <img class="img-article-left" alt="post image" src="{{ image_list.resized_image.url }}">
-                        </p>
-
-                    {% endif %}
-                    <p>{{ p.text|linebreaks|truncatewords:50 }}</p>
-                    <p>
-
-
-                    <div class="post_footer">
-                        {% include 'likes/includes/add_like.html' with post_id=p.pk %}
-                        <div class="tags-footer">
-                                {% for t in p.tags.all %}
-
-                                    <li class="tags-footer-li">{{ t }}</li>
-
-                                {% endfor %}
+                                            <p class="m-top-sm m-bottom-sm">
+                                                {{ p.text|linebreaks|truncatewords:50 }}
+                                            </p>
+                                            {% for t in p.tags.all %}
+                                                <i class="fa">{{ t }}</i>
+                                            {% endfor %}
+                                            <span class="post-like text-muted tooltip-test" data-toggle="tooltip"
+                                                  data-original-title="I like this post!">{% include 'likes/includes/add_like.html' with post_id=p.pk %}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                <p>
-
+                {% endfor %}
             </div>
-
-        {% endfor %}
-    </ul>
+        </div>
+    </div>
 
 {% endblock %}
 

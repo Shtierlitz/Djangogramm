@@ -1,8 +1,15 @@
 {% extends 'users/base.html' %}
 
 {% block content %}
-
-<p>Ваша ссылка некоректна, залогинтесь снова</p>
-    <a href="{%  url 'login' %}">Войти</a>
-
-{%  endblock %}
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="card">
+                <div class="well well-sm">
+                    <br>
+                    <p style="text-align: center"><strong>Ваша ссылка некоректна, залогинтесь снова</strong></p>
+                    <p style="text-align: center"><a  href="{% url 'login' %}">Войти</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

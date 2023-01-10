@@ -12,18 +12,16 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 import sys
 from pathlib import Path
+import cloudinary_storage
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 import environ
 
-BASE_DIR = Path(__file__).resolve().parent.parent
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
-
-
 
 
 AUTH_USER_MODEL = 'users.User'
@@ -45,7 +43,6 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 RECIPIENTS_EMAIL = env('RECIPIENTS_EMAIL')
 
-
 # with open('secrets.txt', "r", encoding="utf-8") as f:
 #     SECRET_KEY = f.readline().strip()
 #     EMAIL_HOST_USER = f.readline().strip()
@@ -54,10 +51,8 @@ RECIPIENTS_EMAIL = env('RECIPIENTS_EMAIL')
 #     RECIPIENTS_EMAIL = f.readline().strip()
 
 
-
 if 'test' in sys.argv:
     CAPTCHA_TEST_MODE = True
-
 
 # Application definition
 
@@ -71,11 +66,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
     'captcha',
+    'cloudinary',
+    'cloudinary_storage',
+    # 'django_dump_load_utf8',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', #add whitenoise
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # add whitenoise
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -105,12 +103,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'djangogramm.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-
-
 
 
 # Password validation
@@ -131,7 +125,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -143,13 +136,10 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
-
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -167,10 +157,19 @@ DJANGORESIZED_DEFAULT_FORCE_FORMAT = 'JPEG'
 DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {'JPEG': ".jpg"}
 DJANGORESIZED_DEFAULT_NORMALIZE_ROTATION = True
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 try:
     from .local_settings import *
 except ImportError:
     from .prod_settings import *
 
+if 'test' not in sys.argv:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': env("CLOUD_NAME"),
+        "API_KEY": env("API_KEY"),
+        "API_SECRET": env("API_SECRET"),
+    }
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

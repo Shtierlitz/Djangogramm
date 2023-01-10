@@ -3,35 +3,57 @@
 
 {% block content %}
     {% user_post post.user.id as users_post %}
-    <div class="article-panel">
-        <p class="first">User: {{ users_post }}</p>
-        <p class="last">Date: {{ post.time_update|date:"d-m-Y H:i:s" }}</p>
-    </div>
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            {#            <div class="col col-lg-9 col-xl-7">#}
+            <div class="card">
+                <div class="panel-body">
+                    <p class="text-left">User: {{ users_post }}</p>
+                    <p class="text-right">Date: {{ post.time_update|date:"d-m-Y H:i:s" }}</p>
+                    <legend class="text-center">{{ post.title }}</legend>
 
-    <h1>{{ post.title }}</h1>
+                    {% post_image post.id as image_list %}
+                    {% if image_list %}
+                        {% for i in image_list %}
+                            <div class="card-body">
+                                <div class="col mb-2">
+                                    <img src="{{ i.image.url }}"
+                                         alt="image 1" class="rounded mx-auto d-block" style="width: 500px">
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
 
-    {% post_image post.id as image_list %}
-    {% if image_list %}
-        <p>
-            {% for i in image_list %}
-                <img class="img-article-left thumb" alt="post image" src="{{ i.image.url }}">
-            {% endfor %}
-        </p>
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <p class="card-text" style="">{{ post.text|linebreaks }}</p>
+                        </div>
+                    </div>
+                    {% if request.user.id == post.user.pk %}
+                        <br>
+                        <form method="post">
+                            {{ form.as_p }}
+                            {% csrf_token %}
+                            <input type="hidden" name="delete" value="delete">
+                            <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
+                                    style="z-index: 1;">Удалить пост
+                            </button>
+                        </form>
+                        <br>
+                    {% endif %}
+                    {% for t in post.tags.all %}
+                        <i class="fa">{{ t }}</i>
+                    {% endfor %}
+                    <span class="post-like text-muted tooltip-test" data-toggle="tooltip"
+                          data-original-title="I like this post!">{% include 'likes/includes/add_like.html' with post_id=post.pk %}</span>
 
-    {% endif %}
-    <p>{{ post.text|linebreaks }}</p>
-    <p>{{ post.tags }}</p>
-
-    <div class="post_footer">
-        {% include 'likes/includes/add_like.html' with post_id=post.pk %}
-        <div class="tags-footer-post">
-                {% for t in post.tags.all %}
-
-                    <li class="tags-footer-li-post">{{ t }}</li>
-
-                {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
+
+
+
 
 {% endblock %}
 

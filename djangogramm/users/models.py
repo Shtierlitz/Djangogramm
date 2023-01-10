@@ -14,6 +14,8 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=20)
     avatar = models.ImageField(upload_to="photos/users", blank=True)
     about = models.TextField(blank=True, default="About user")
+    slug = models.SlugField(max_length=50, unique=True, db_index=True, null=True, verbose_name='URL')
+    follows = models.ManyToManyField('self', symmetrical=False)
 
     email_verify = models.BooleanField(default=False)
 
@@ -22,6 +24,9 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ("id",)
+
+    def get_absolute_url(self):
+        return reverse('foreign_profile', kwargs={'user_slug': self.slug})
 
 
 class Post(models.Model):
@@ -32,7 +37,7 @@ class Post(models.Model):
     is_published = models.BooleanField(default=True)
     tags = models.ManyToManyField("Tag", blank=True, related_name='posts', verbose_name="Тэги")
 
-    user = models.ForeignKey("User", on_delete=models.SET_NULL, null=True, verbose_name="Пользователь")
+    user = models.ForeignKey("User", on_delete=models.CASCADE, null=True, verbose_name="Пользователь")
 
     class Meta:
         ordering = ('-time_create', 'id')
@@ -70,7 +75,8 @@ class Image(models.Model):
         force_format='PNG',
         null=True
     )
-    post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
 
 

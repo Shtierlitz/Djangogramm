@@ -1,18 +1,43 @@
 {% extends 'users/base.html' %}
 
 {% block content %}
-<h1>{{ title }}</h1>
-<p>Сайт разработан как учебный проект проходя курсы FoxMinded</p>
-    <ul>
-        <li>Задания: </li>
-        <li>Разработать Django проект.</li>
-        <li>Создать модели Пользоветелей, фотографий и т.д..</li>
-        <li>Добавить представления и пути</li>
-        <li>Добавить функционал сохранения фотографий и создания превью</li>
-        <li>Добавить функционал лайков и дислайков</li>
-        <li>Добавить функционал тегов</li>
-        <li>Заполнить исскуственными даннами базу данных и сгенерировать миграции</li>
-        <li>Розместить сайт на сервере</li>
-        <li>Покрыть проект тестами</li>
-    </ul>
+    <div class="about-section paddingTB60">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-7 col-sm-6">
+                    <div class="about-title clearfix">
+                        <h1>{{ title }} <span>Djangogramm</span></h1>
+                        <h3>Сайт разработан как учебный проект проходя курсы FoxMinded </h3>
+                        <p class="about-paddingB">Задания:</p>
+                        <p>Разработать Django проект.</p>
+                        <p>Создать модели Пользоветелей, фотографий и т.д.</p>
+                        <p>Добавить представления и пути</p>
+                        <p>Добавить функционал сохранения фотографий и создания превью</p>
+                        <p>Добавить функционал лайков и дислайков</p>
+                        <p>Добавить функционал тегов</p>
+                        <p>Заполнить исскуственными даннами базу данных и сгенерировать миграции</p>
+                        <p>Разместить сайт на сервере</p>
+                        <p>Покрыть проект тестами</p>
+                        <div class="about-icons">
+                            <ul>
+                                <li><a href="https://www.facebook.com/profile.php?id=100009034396916"><i id="social-fb"
+                                                                                                         class="fa fa-facebook-square fa-3x social"></i></a>
+                                </li>
+                                <li><a href="{% url 'contact' %}"><i id="social-em"
+                                                                     class="fa fa-envelope-square fa-3x social"></i></a>
+                                </li>
+                            </ul>
+
+
+                        </div>
+                    </div>
+                    <div class="col-md-5 col-sm-6">
+                        <div class="about-img">
+                            <img src="https://devitems.com/preview/appmom/img/mobile/2.png" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

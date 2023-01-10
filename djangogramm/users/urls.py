@@ -21,6 +21,9 @@ urlpatterns = [
     path("logout/", LogoutView.as_view(), name="logout"),
     path('likes/add/', AddLikeView.as_view(), name='add'),
     path('likes/remove/', RemoveLikeView.as_view(), name='remove'),
+    path('foreign_profile/<slug:user_slug>/', ForeignProfile.as_view(), name='foreign_profile'),
+    path('user/<int:user_id>/followers/', Followers.as_view(), name='followers'),
+    path('user/<int:user_id>/follows/', Follows.as_view(), name='follows'),
     # path('tags/', tags_list, name='tags_list_url'),
 ]
 

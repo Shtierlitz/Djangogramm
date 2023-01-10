@@ -1,21 +1,16 @@
-import sys
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseServerError, HttpResponseNotFound
 from django.shortcuts import render, redirect, get_object_or_404
-from django.template.loader import get_template
+
 from django.urls import reverse_lazy
 from django.utils.http import urlsafe_base64_decode
 from django.views import View
 from django.views.generic import ListView, DetailView, FormView
 from django.contrib.auth import login
-from django.contrib.auth.tokens import default_token_generator as token_generator
 
 from users.forms import *
-from users.models import Post, Image, Like, Tag
-from .utils import DataMixin, send_email_verify, tag_creator
+from .utils import *
 
 User = get_user_model()
 
@@ -49,6 +44,34 @@ class PostsFeed(DataMixin, View):
         return render(request, self.template_name, context=context)
 
 
+class ShowPost(DataMixin, View):
+    model = Post
+    template_name = 'users/post.html'
+
+    def get(self, request, post_id):
+        context = self.get_user_context()
+        context_mixin = self.get_user_context(title=Post.objects.get(pk=post_id))
+        context['post'] = Post.objects.get(pk=post_id)
+        context = dict(list(context.items()) + list(context_mixin.items()))
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, post_id):
+        context = self.get_user_context()
+        context['post'] = Post.objects.get(pk=post_id)
+        obj_post = Post.objects.get(pk=post_id)
+        obj_image = Image.objects.filter(post=post_id)
+        context_mixin = self.get_user_context(title=obj_post.title)
+        context = dict(list(context.items()) + list(context_mixin.items()))
+
+        if request.POST.get('delete'):
+            obj_post.delete()
+            for i in obj_image:
+                i.delete()
+            return redirect('home')
+
+        return render(request, self.template_name, context=context)
+
+
 class AboutSite(DataMixin, View):
     def get(self, request):
         context = self.get_user_context()
@@ -59,13 +82,15 @@ class AboutSite(DataMixin, View):
 class Profile(LoginRequiredMixin, DataMixin, ListView):
     model = User
     template_name = 'users/user.html'
-    # login_url = reverse_lazy('home')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user'] = get_object_or_404(User, pk=self.request.user.pk)
-        context_mixin = self.get_user_context(title="Профиль")
-        context_mixin['menu'].insert(2, ({'title': 'Изменить профиль', 'url_name': 'change_profile'}))
+        context_mixin = self.get_user_context(title=f"Ваш профиль: {context['user']}")
+        context_mixin['followers'] = context['user'].follows.all().count()
+        context_mixin['follows'] = len(get_folowers(context['user']))
+        context_mixin['user_images'] = Image.objects.filter(user=self.request.user.pk).order_by('-id')
+        context_mixin['user_images_count'] = len(context_mixin['user_images'])
         return dict(list(context.items()) + list(context_mixin.items()))
 
 
@@ -92,7 +117,7 @@ class ChangeProfile(LoginRequiredMixin, DataMixin, View):
         settings_exists = get_object_or_404(User, pk=request.user.pk)
         settings_form = ChangeProfileForm(request.POST, request.FILES, instance=settings_exists)
         if settings_form.is_valid():
-            settings_form.save()
+            settings_form.save_with_slug()
             return redirect('user')
         else:
             settings_form = ChangeProfileForm(request.POST, request.FILES)
@@ -103,18 +128,6 @@ class ChangeProfile(LoginRequiredMixin, DataMixin, View):
             context['image'] = user.avatar
 
         return render(request, self.template_name, context=context)
-
-
-class ShowPost(DataMixin, DetailView):
-    model = Post
-    template_name = 'users/post.html'
-    pk_url_kwarg = 'post_id'
-    context_object_name = 'post'
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context_mixin = self.get_user_context(title=context['post'])
-        return dict(list(context.items()) + list(context_mixin.items()))
 
 
 class AddPage(LoginRequiredMixin, DataMixin, View):
@@ -148,7 +161,7 @@ class AddPage(LoginRequiredMixin, DataMixin, View):
             post_obj.user_id = user.pk
             post_obj.save()
             tag_form.save_for(post_obj)
-            image_form.save_for(post_obj.pk)
+            image_form.save_for(post_obj.pk, user.pk)
             return redirect('home')
         else:
             return render(request, self.template_name, context=context)
@@ -167,24 +180,6 @@ class ContactFormView(DataMixin, FormView):
     def form_valid(self, form):
         send_message(form.cleaned_data['name'], form.cleaned_data['email'], form.cleaned_data['content'])
         return redirect('home')
-
-
-def send_message(name, email, content):
-    text = get_template("users/message.html")
-    html = get_template("users/message.html")
-    context = {
-        'name': name,
-        'email': email,
-        'content': content
-    }
-    subject = "Сообщение от пользователя"
-    from_email = "example@gmail.com"
-    text_content = text.render(context)
-    html_content = html.render(context)
-
-    msg = EmailMultiAlternatives(subject, text_content, from_email, ['rollbar1990@gmail.com'])
-    msg.attach_alternative(html_content, 'text/html')
-    msg.send()
 
 
 class LoginUser(DataMixin, LoginView):
@@ -214,7 +209,7 @@ class RegisterUser(DataMixin, View):
     def post(self, request):
         form = self.form_class(request.POST)
         if form.is_valid():
-            form.save()
+            form.save_with_slag()
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
@@ -303,6 +298,74 @@ class RemoveLikeView(View):
         like.delete()
 
         return redirect(url_form)
+
+
+class Followers(DataMixin, DetailView):
+    model = User
+    template_name = 'users/followers.html'
+    pk_url_kwarg = 'user_id'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context_mixin = self.get_user_context(title="Подписчики")
+        context_mixin['followers'] = context['user'].follows.all()
+        return dict(list(context.items()) + list(context_mixin.items()))
+
+
+class Follows(DataMixin, DetailView):
+    model = User
+    template_name = 'users/follows.html'
+    pk_url_kwarg = 'user_id'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context_mixin = self.get_user_context(title="Подписан")
+        context_mixin['follows'] = get_folowers(context['user'])
+        return dict(list(context.items()) + list(context_mixin.items()))
+
+
+class ForeignProfile(LoginRequiredMixin, DataMixin, View):
+    model = User
+    template_name = 'users/foreign_profile.html'
+
+    def get(self, request, user_slug):
+        context = self.get_user_context()
+        context['user'] = request.user
+
+        context_mixin = self.get_user_context(title=context['user'])
+        context_mixin['foreign_user'] = User.objects.get(slug=user_slug)
+        context_mixin['followers'] = context_mixin['foreign_user'].follows.all().count()
+        context_mixin['follows'] = len(get_folowers(context_mixin['foreign_user']))
+        context_mixin['user_images'] = Image.objects.filter(user=context_mixin['foreign_user'].pk).order_by('-id')
+        context_mixin['user_images_count'] = len(context_mixin['user_images'])
+
+        context = dict(list(context.items()) + list(context_mixin.items()))
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, user_slug):
+        context = self.get_user_context()
+        context['user'] = request.user
+        sub = request.POST.get('subscribe')
+        unsub = request.POST.get('unsubscribe')
+
+
+
+        context_mixin = self.get_user_context(title=context['user'])
+        context_mixin['foreign_user'] = User.objects.get(slug=user_slug)
+        context_mixin['followers'] = context_mixin['foreign_user'].follows.all().count()
+        context_mixin['follows'] = len(get_folowers(context_mixin['foreign_user']))
+        context_mixin['user_images'] = Image.objects.filter(user=context_mixin['foreign_user'].pk).order_by('-id')
+        context_mixin['user_images_count'] = len(context_mixin['user_images'])
+
+        context = dict(list(context.items()) + list(context_mixin.items()))
+        if sub is not None:
+            subscribe(request, user_slug)
+            return redirect('foreign_profile', user_slug=user_slug)
+        elif unsub is not None:
+            unsubscribe(request, user_slug)
+            return redirect('foreign_profile', user_slug=user_slug)
+
+        return render(request, self.template_name, context=context)
 
 
 def pageNotFound(request, exception):

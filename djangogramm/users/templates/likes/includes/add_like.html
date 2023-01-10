@@ -7,7 +7,7 @@
     {% likes_id post_id as likes_id %}
 {% endif %}
 
-<form class="like-form" action="{% if not is_liked_bool %}{% url 'add' %}{% else %}{% url 'remove' %}{% endif %}"
+<form action="{% if not is_liked_bool %}{% url 'add' %}{% else %}{% url 'remove' %}{% endif %}"
       method="post">
     {% csrf_token %}
     <input type="hidden" name="post_id" value="{{ post_id }}">
@@ -21,10 +21,10 @@
 
     <button type="submit" class="btn">
         {% if not is_liked_bool %}
-            <div class="heart"></div>
+            <i class="fa fa-heart-o"></i>
         {% else %}
-            <div class="heart-solid"></div>
+            <i class="fa fa-heart" style='color: red'></i>
         {% endif %}
-        <span class="likes-qty"{{ likes_counter }}>{{ likes_counter }}</span>
+        <span class="like-count"{{ likes_counter }}>{{ likes_counter }}</span>
     </button>
 </form>

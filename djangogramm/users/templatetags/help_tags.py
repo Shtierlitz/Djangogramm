@@ -23,4 +23,12 @@ def post_image(post_id, post_1=None):
         return None
 
 
+@register.simple_tag(takes_context=True)
+def is_subscribed(context, user):
+    request = context['request']
+    try:
+        subscriber = User.objects.get(pk=user.pk).follows.get(pk=request.user.id)
+    except Exception as e:
+        subscriber = False
+    return subscriber
 

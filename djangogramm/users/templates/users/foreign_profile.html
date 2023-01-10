@@ -2,33 +2,31 @@
 {% load help_tags %}
 
 {% block content %}
+
     <div class="container py-5 h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col col-lg-9 col-xl-7">
                 <div class="card">
                     <div class="rounded-top text-white d-flex flex-row"
                          style="background-color: #000; height:200px;">
-                        <div class="ms-4 mt-5 d-flex flex-column" >
-                            {% if user.avatar %}
-                                <img src="{{ user.avatar.url }}"
-                                     alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-lg-4"
-                                     style="width: 150px; z-index: 1; max-height: 150px">
+                        <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px;">
+                            {% if foreign_user.avatar %}
+                                <img src="{{ foreign_user.avatar.url }}"
+                                     alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2"
+                                     style="width: 150px; z-index: 1">
                             {% else %}
                                 <img src="https://as2.ftcdn.net/v2/jpg/03/15/18/09/1000_F_315180932_rhiXFrJN27zXCCdrgx8V5GWbLd9zTHHA.jpg"
                                      alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2"
-                                     style="width: 150px; z-index: 1; ">
+                                     style="width: 150px; z-index: 1">
                             {% endif %}
-                            <a href="{% url 'change_profile' %}" class="btn btn-outline-dark"
-                               data-mdb-ripple-color="dark"
-                               style="z-index: 1;">
-                                Редактировать
-                            </a>
                         </div>
+
                         <div class="ms-3" style="margin-top: 130px;">
-                            <h5>{{ user.username }}</h5>
-                            <p>{{ user.first_name }} {{ user.last_name }}</p>
+                            <h5>{{ foreign_user.username }}</h5>
+                            <p>{{ foreign_user.first_name }} {{ foreign_user.last_name }}</p>
                         </div>
                     </div>
+
                     <div class="p-4 text-black" style="background-color: #f8f9fa;">
                         <div class="d-flex justify-content-end text-center py-1">
                             <div>
@@ -38,30 +36,49 @@
                             <div class="px-3">
                                 <p class="mb-1 h5">{{ followers }}</p>
                                 <p class="small text-muted mb-0"><a
-                                        href="{% url 'followers' user.pk %}">Followers</a></p>
+                                        href="{% url 'followers' foreign_user.pk %}">Followers</a></p>
                             </div>
                             <div>
                                 <p class="mb-1 h5">{{ follows }}</p>
-                                <p class="small text-muted mb-0"><a href="{% url 'follows' user.pk %}">Following</a>
+                                <p class="small text-muted mb-0"><a href="{% url 'follows' foreign_user.pk %}">Following</a>
                                 </p>
                             </div>
                         </div>
                     </div>
+
                     <div class="card-body p-4 text-black">
                         <div class="mb-5">
                             <p class="lead fw-normal mb-1">О себе</p>
                             <div class="p-4" style="background-color: #f8f9fa;">
-                                <p class="font-italic mb-1">{{ user.about }}</p>
+                                <p class="font-italic mb-1">{{ foreign_user.about }}</p>
                                 {#                                    <p class="font-italic mb-1">Lives in New York</p>#}
                                 {#                                    <p class="font-italic mb-0">Photographer</p>#}
                             </div>
                         </div>
+                        {% is_subscribed foreign_user as is_subscribed_bool %}
+                        {% if not is_subscribed_bool %}
+                            <form method="post">
+                                {{ form.as_p }}
+                                {% csrf_token %}
+                                <input type="hidden" name="subscribe" value="{{ 1 }}">
+                                <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
+                                        style="z-index: 1;">Подписаться
+                                </button>
+                            </form>
+
+                        {% else %}
+                            <form method="post">
+                                {{ form.as_p }}
+                                {% csrf_token %}
+                                <input type="hidden" name="unsubscribe" value="{{ 1 }}">
+                                <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
+                                        style="z-index: 1;">
+                                    Отписаться
+                                </button>
+                            </form>
+                        {% endif %}
+                    <br>
                         {% for i in user_images %}
-                            {#                                <div class="d-flex justify-content-between align-items-center mb-4">#}
-                            {#              <p class="lead fw-normal mb-0">Recent photos</p>#}
-                            {#              <p class="mb-0"><a href="#!" class="text-muted">Show all</a></p>#}
-                            {#                                </div>#}
-                            {#                                <div class="row g-2">#}
                             <div class="row">
                                 <div class="col-sm-6 mb-3 mb-sm-0">
                                     <div class="card" style="width: 200%">
@@ -74,11 +91,12 @@
                                     </div>
                                 </div>
                             </div>
-
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+
 {% endblock %}

@@ -1,7 +1,8 @@
 from django.test import TestCase, SimpleTestCase
 from django.urls import reverse, resolve
 from users.views import PostsFeed, Profile, ChangeProfile, ShowPost, AboutSite, AddPage, ContactFormView, RegisterUser, \
-    LoginUser, EmailVerify, ConfirmEmailView, InvalidVerifyView, AddLikeView, RemoveLikeView
+    LoginUser, EmailVerify, ConfirmEmailView, InvalidVerifyView, AddLikeView, RemoveLikeView, ForeignProfile, Followers, \
+    Follows
 from django.contrib.auth.views import LogoutView
 
 
@@ -69,3 +70,17 @@ class TestUrls(SimpleTestCase):
     def test_RemoveLikeView(self):
         url = reverse('remove')
         assert resolve(url).func.view_class == RemoveLikeView
+
+    def test_ForeignProfile(self):
+        url = reverse('foreign_profile', args=['slug'])
+        assert resolve(url).func.view_class == ForeignProfile
+
+    def test_Followers(self):
+        url = reverse('followers', args=[1])
+        assert resolve(url).func.view_class == Followers
+
+    def test_Follows(self):
+        url = reverse('follows', args=[1])
+        assert resolve(url).func.view_class == Follows
+
+

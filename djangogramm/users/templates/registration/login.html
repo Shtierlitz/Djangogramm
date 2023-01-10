@@ -1,20 +1,57 @@
 {% extends 'users/base.html' %}
 
 {% block content %}
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="card">
+                <div class="well well-sm">
+                    {#                    {% if login %}#}
+                    {#                        {{ login }}#}
+                    {#                    {% endif %}#}
+                    {% if form.errors %}
+                        <p>{{ form.errors.error }}</p>
+                    {% endif %}
 
-<h1>{{ title }}</h1>
-    {% if login %}
-    {{ login }}
-    {% endif %}
-    {% if form.errors %}
-    <p>{{ form.errors.error }}</p>
-    {% endif %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <legend class="text-center">{{ title }}</legend>
+                        <!-- Form username -->
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"
+                                   for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                            <div class="col-md-9" style="max-width: 50%">
+                                <input id="username" name="username" type="text"
+                                       class="form-control">
+                            </div>
+                            <div class="form-error">{{ form.username.errors }}</div>
+                        </div>
+                        <br>
+                        <!-- Form password -->
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"
+                                   for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+                            <div class="col-md-9" style="max-width: 50%">
+                                <input id="password" name="password" type="text"
+                                       class="form-control">
+                            </div>
+                            <div class="form-error">{{ form.password.errors }}</div>
+                        </div>
+                        <br>
 
-<form method="post">
-    {{ form.as_p }}
-    {% csrf_token %}
-<button type="submit">Войти</button>
-</form>
+                        <div class="form-group">
+                            <div class="col-md-12 text-right">
+                                <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
+                                        style="z-index: 1;">
+                                    Войти
+                                </button>
+                            </div>
+                        </div>
+                        <br>
+                    </form>
 
-{#    <a href="{% url 'password_reset' %}">Забыл пароль?</a>#}
+                    {#    <a href="{% url 'password_reset' %}">Забыл пароль?</a>#}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
