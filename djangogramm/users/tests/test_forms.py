@@ -9,7 +9,6 @@ from io import BytesIO
 from PIL import Image as Im
 from django.core.files.base import File
 
-
 MEDIA_ROOT = tempfile.mkdtemp()
 User = get_user_model()
 
@@ -73,8 +72,8 @@ class TestForms(TestCase):
                 'username': 'Test_username',
                 'first_name': 'test_first_name',
                 'last_name': 'test_second_name',
-                'avatar': 'test.png',   # not required
-                'about': 'test_about'   # not required
+                'avatar': 'test.png',  # not required
+                'about': 'test_about'  # not required
             },
             files={
                 InMemoryUploadedFile: self.get_image_file('test.png')
@@ -90,9 +89,9 @@ class TestForms(TestCase):
     def test_ChangeProfileForm_clean_fields(self):
         form = ChangeProfileForm(
             data={
-                'username': 'u'*151,
-                'first_name': 't'*21,
-                'last_name': 't'*21,
+                'username': 'u' * 151,
+                'first_name': 't' * 21,
+                'last_name': 't' * 21,
                 'avatar': 'test.png',  # not required
                 'about': 'test_about'  # not required
             })
@@ -116,7 +115,7 @@ class TestForms(TestCase):
 
     def test_RegisterForm_clean_fields(self):
         form = RegisterForm(data={
-            'username': 'u'*151,
+            'username': 'u' * 151,
             'email': "test_email",
             'password1': '1234_test_true',
             'password2': '1234_test_false'
@@ -148,7 +147,7 @@ class TestForms(TestCase):
 
     def test_ContactForm_is_valid(self):
         form = ContactForm(data={
-            'name':  'test_name',
+            'name': 'test_name',
             'email': "test_email@mail.com",
             'content': 'test_content',
             'captcha_0': 'test',
@@ -163,7 +162,7 @@ class TestForms(TestCase):
 
     def test_ContactForm_clean_fields(self):
         form = ContactForm(data={
-            'name': 't'*300,
+            'name': 't' * 300,
             'email': "test_email",
             'content': 'test_content',
             'captcha_0': '0',
@@ -172,17 +171,23 @@ class TestForms(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEquals(len(form.errors), 3)
 
+    def test_ImageForm(self):
+        self.image = self.get_image_file('test.png')
 
-    # def test_ImageForm(self):
-    #     self.image = self.get_image_file('test.png')
-    #
-    #     form = ImageForm(data={'image': 'test.png'}, files={
-    #         InMemoryUploadedFile: self.image
-    #     })
-    #     print(form.clean_image())
-    #     print(form.is_valid())
-    #     self.assertTrue(form.is_valid())
+        form = ImageForm(data={'image': 'test.png'}, files={
+            'image': self.image
+        })
+        self.assertTrue(form.is_valid())
+
+    def test_ImageForm_no_data(self):
+        form = ImageForm(data={})
+        self.assertFalse(form.is_valid())
+        self.assertEquals(len(form.errors), 1)
+
+    def test_ImageForm_clean_image_field(self):
+        form = ImageForm(data={'image': []})
+        self.assertFalse(form.is_valid())
+        self.assertEquals(len(form.errors), 1)
     #
     #     '''image = [i for i in self.request.FILES.getlist('image') if 'image' in i.content_type]
     #     AttributeError: 'HttpResponse' object has no attribute 'FILES'''''
-
