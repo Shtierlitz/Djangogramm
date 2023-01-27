@@ -291,13 +291,10 @@ def ajax_add_follower(request):
         for user in f_user.follows.all():
             if user.id == user_id:
                 follow_inst = user
-        print(follow_inst)
         try:
             f_user.objects.filter(follows__id=p_user.id)
         except Exception as e:
-            print(f_user.follows.all())
             f_user.follows.add(p_user)
-            print(f_user.follows.all())
         return JsonResponse(data)
 
 
