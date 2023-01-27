@@ -4,16 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ title }}</title>
-    <link type="text/css" href="{% static 'users/css/bootstrap.css' %}" rel="stylesheet"/>
-    <link type="text/css" href="{% static 'users/css/styles2.css' %}" rel="stylesheet"/>
+    <link type="text/css" href="{% static 'users/js/styles2.css' %}" rel="stylesheet"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <link rel="shortcut icon" href="{% static 'users/images/ico_2.png' %}" type="image/x-icon"/>
     <meta name="viewport" content="width=768px, maximum-scale=1.0,
 minimum-scale=0.25"/>
-    <script src="{% static 'users/js/bootstrap.js' %}"></script>
-{#    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>#}
-{#    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>#}
+    <script src="{% static 'users/js/bundle.js' %}" async></script>
 </head>
 <body>
 {% block mainmenu %}
@@ -64,18 +61,28 @@ minimum-scale=0.25"/>
 
 {% endblock mainmenu %}
 <section class="h-100 gradient-custom-2" style="min-height: 1000px">
-<table class="table-page" border="0" cellpadding="0" cellspacing="0">
-    <tr>
-        <td valign="top">
-            <div class="center">
+    <table class="table-page" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td valign="top">
+                <div class="center">
 
-                {% block content %}
-                {% endblock %}
-            </div>
-        </td>
-    </tr>
-</table>
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </td>
+        </tr>
+    </table>
 </section>
 
 </body>
 </html>
+
+
+
+    {#    <link type="text/css" href="{% static 'users/css/bootstrap.css' %}" rel="stylesheet"/>#}
+    {#    <script src="{% static 'users/js/bootstrap.js' %}"></script>#}
+    {#    <script src="https://code.jquery.com/jquery-3.6.3.js"></script>#}
+    {#    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>#}
+    {#    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>#}
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>#}
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>#}

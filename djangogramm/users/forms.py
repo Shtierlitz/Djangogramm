@@ -138,6 +138,7 @@ class LoginForm(AuthenticationForm):
                 username=username,
                 password=password
             )
+
             if self.user_cache is None:
                 raise self.get_invalid_login_error()
             else:
@@ -152,7 +153,7 @@ class LoginForm(AuthenticationForm):
 
     class Meta:
         # model = User
-        fields = ['username', 'email']
+        fields = ['username', 'password']
 
 
 class ContactForm(forms.Form):

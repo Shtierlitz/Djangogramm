@@ -1,3 +1,34 @@
+{#{% load likes %}#}
+{##}
+{#{% is_liked post_id as is_liked_bool %}#}
+{#{% count_likes post_id as likes_counter %}#}
+{##}
+{#{% if is_liked_bool %}#}
+{#    {% likes_id post_id as likes_id %}#}
+{#{% endif %}#}
+{##}
+{#<form action="{% if not is_liked_bool %}{% url 'add' %}{% else %}{% url 'remove' %}{% endif %}"#}
+{#      method="post">#}
+{#    {% csrf_token %}#}
+{#    <input type="hidden" name="post_id" value="{{ post_id }}">#}
+{#    <input type="hidden" name="user_id"#}
+{#           value="{% if user.is_authenticated %}{{ request.user.id }}{% else %}None{% endif %}">#}
+{#    <input type="hidden" name="url_form" value="{{ request.path }}">#}
+{##}
+{#    {% if is_liked_bool %}#}
+{#        <input type="hidden" name="likes_id" value="{{ likes_id }}">#}
+{#    {% endif %}#}
+{##}
+{#    <button type="submit" class="btn">#}
+{#        {% if not is_liked_bool %}#}
+{#            <i class="fa fa-heart-o"></i>#}
+{#        {% else %}#}
+{#            <i class="fa fa-heart" style='color: red'></i>#}
+{#        {% endif %}#}
+{#        <span class="like-count"{{ likes_counter }}>{{ likes_counter }}</span>#}
+{#    </button>#}
+{#</form>#}
+
 {% load likes %}
 
 {% is_liked post_id as is_liked_bool %}
@@ -7,24 +38,31 @@
     {% likes_id post_id as likes_id %}
 {% endif %}
 
-<form action="{% if not is_liked_bool %}{% url 'add' %}{% else %}{% url 'remove' %}{% endif %}"
-      method="post">
-    {% csrf_token %}
+<form
+        {% if not is_liked_bool %}
+            class="add-remove-like add-like"
+            action="{% url 'add-ajax' %}"
+        {% else %}
+            class="add-remove-like remove-like"
+            action="{% url 'remove-ajax' %}"
+        {% endif %}
+            method="POST">{% csrf_token %}
     <input type="hidden" name="post_id" value="{{ post_id }}">
     <input type="hidden" name="user_id"
            value="{% if user.is_authenticated %}{{ request.user.id }}{% else %}None{% endif %}">
+    <input type="hidden" name="likes_id" value="{{ likes_id }}">
     <input type="hidden" name="url_form" value="{{ request.path }}">
-
-    {% if is_liked_bool %}
-        <input type="hidden" name="likes_id" value="{{ likes_id }}">
-    {% endif %}
-
-    <button type="submit" class="btn">
+    <div class="like-btn-wrap">
         {% if not is_liked_bool %}
-            <i class="fa fa-heart-o"></i>
+            <button type="submit" class="add-like-btn btn btn-outline-danger">
+                <i class="fa fa-heart-o"></i>
+                <span class="likes-qty">{{ likes_counter }}</span>
+            </button>
         {% else %}
-            <i class="fa fa-heart" style='color: red'></i>
+            <button type="submit" class="remove-like-btn btn btn-danger">
+                <i class="fa fa-heart"></i>
+                <span class="likes-qty">{{ likes_counter }}</span>
+            </button>
         {% endif %}
-        <span class="like-count"{{ likes_counter }}>{{ likes_counter }}</span>
-    </button>
+    </div>
 </form>

@@ -34,7 +34,7 @@
                                 <p class="small text-muted mb-0">Photos</p>
                             </div>
                             <div class="px-3">
-                                <p class="mb-1 h5">{{ followers }}</p>
+                                <div class="followers-span"  style="padding-bottom: 2px"><span class="fl-qty mb-1 h5">{{ followers }}</span></div>
                                 <p class="small text-muted mb-0"><a
                                         href="{% url 'followers' foreign_user.pk %}">Followers</a></p>
                             </div>
@@ -55,28 +55,7 @@
                                 {#                                    <p class="font-italic mb-0">Photographer</p>#}
                             </div>
                         </div>
-                        {% is_subscribed foreign_user as is_subscribed_bool %}
-                        {% if not is_subscribed_bool %}
-                            <form method="post">
-                                {{ form.as_p }}
-                                {% csrf_token %}
-                                <input type="hidden" name="subscribe" value="{{ 1 }}">
-                                <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
-                                        style="z-index: 1;">Подписаться
-                                </button>
-                            </form>
-
-                        {% else %}
-                            <form method="post">
-                                {{ form.as_p }}
-                                {% csrf_token %}
-                                <input type="hidden" name="unsubscribe" value="{{ 1 }}">
-                                <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
-                                        style="z-index: 1;">
-                                    Отписаться
-                                </button>
-                            </form>
-                        {% endif %}
+                        {% include 'followers/includes/followers.html' with foreign_user=foreign_user %}
                     <br>
                         {% for i in user_images %}
                             <div class="row">

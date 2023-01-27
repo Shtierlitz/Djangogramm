@@ -1,0 +1,59 @@
+{% load help_tags %}
+
+{#{% is_subscribed foreign_user as is_subscribed_bool %}#}
+{#{% if not is_subscribed_bool %}#}
+{#    <form method="post">#}
+{#        {{ form.as_p }}#}
+{#        {% csrf_token %}#}
+{#        <input type="hidden" name="subscribe" value="{{ 1 }}">#}
+{#        <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"#}
+{#                style="z-index: 1;">Подписаться#}
+{#        </button>#}
+{#    </form>#}
+{##}
+{#{% else %}#}
+{#    <form method="post">#}
+{#        {{ form.as_p }}#}
+{#        {% csrf_token %}#}
+{#        <input type="hidden" name="unsubscribe" value="{{ 1 }}">#}
+{#        <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"#}
+{#                style="z-index: 1;">#}
+{#            Отписаться#}
+{#        </button>#}
+{#    </form>#}
+{#{% endif %}#}
+
+{% is_follow foreign_user.id as f_user_is_follow_bool %}
+{#{% is_follow request.user.id as user_is_follow_bool %}#}
+{% count_follows foreign_user.id as f_followers_counter %}
+{% count_follows user.id as  u_followers_counter %}
+
+<form
+        {% if not f_user_is_follow_bool %}
+            class="add-remove-follower add-follower"
+            action="{% url 'ajax-add-follower' %}"
+        {% else %}
+            class="add-remove-follower remove-follower"
+            action="{% url 'ajax-remove-follower' %}"
+        {% endif %}
+            method="POST">{% csrf_token %}
+    <input type="hidden" name="user_id"
+           value="{% if user.is_authenticated %}{{ request.user.id }}{% else %}None{% endif %}">
+    <input type="hidden" name="foreign_user_id" value="{{ foreign_user.id }}">
+    <div class="follow-btn-wrap">
+        {% if not f_user_is_follow_bool %}
+        <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
+                style="z-index: 1;">Подписаться
+{#        <span class="follows-qty">{{ u_followers_counter }}</span>#}
+{#        <span class="followers-qty">{{ f_followers_counter }}</span>#}
+        </button>
+        {% else %}
+        <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
+                style="z-index: 1;">
+            Отписаться
+{#        <span class="follows-qty">{{ u_followers_counter }}</span>#}
+{#        <span class="followers-qty">{{ f_followers_counter }}</span>#}
+        </button>
+        {% endif %}
+    </div>
+</form>

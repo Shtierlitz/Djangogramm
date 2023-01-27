@@ -22,7 +22,7 @@ class UsersAdmin(UserAdmin):
         }),
     )
     add_form = RegisterForm
-    prepopulated_fields = {'slug': ('username',)}
+    # prepopulated_fields = {'slug': ('username',)}
     # list_display = ('id', "username", 'first_name', 'last_name', 'avatar', 'about', 'email')
     # list_display_links = ('id', 'username')
     # search_fields = ('username', 'last_name')
@@ -42,7 +42,7 @@ class ImageAdmin(admin.ModelAdmin):
 
 class LikesAdmin(admin.ModelAdmin):
     autocomplete_fields = ['liked_by', 'post']
-    list_display = ('post', 'liked_by', 'like', 'created')
+    list_display = ('id', 'post', 'liked_by', 'like', 'created')
 
 
 admin.site.register(User, UsersAdmin)

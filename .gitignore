@@ -138,3 +138,4 @@ dmypy.json
 
 #Database
 *.sqlite3
+*node_modules

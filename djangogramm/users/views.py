@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.http import HttpResponseServerError, HttpResponseNotFound
+from django.http import HttpResponseServerError, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from django.urls import reverse_lazy
@@ -8,9 +8,11 @@ from django.utils.http import urlsafe_base64_decode
 from django.views import View
 from django.views.generic import ListView, DetailView, FormView
 from django.contrib.auth import login
+from django.db.models import Count
 
 from users.forms import *
 from .utils import *
+
 
 User = get_user_model()
 
@@ -41,6 +43,7 @@ class PostsFeed(DataMixin, View):
         context = self.get_user_context()
         context['posts'] = posts
         context['search'] = True
+
         return render(request, self.template_name, context=context)
 
 
@@ -52,7 +55,8 @@ class ShowPost(DataMixin, View):
         context = self.get_user_context()
         context_mixin = self.get_user_context(title=Post.objects.get(pk=post_id))
         context['post'] = Post.objects.get(pk=post_id)
-        context = dict(list(context.items()) + list(context_mixin.items()))
+        # context = dict(list(context.items()) + list(context_mixin.items()))
+        context.update(context_mixin)
         return render(request, self.template_name, context=context)
 
     def post(self, request, post_id):
@@ -61,7 +65,8 @@ class ShowPost(DataMixin, View):
         obj_post = Post.objects.get(pk=post_id)
         obj_image = Image.objects.filter(post=post_id)
         context_mixin = self.get_user_context(title=obj_post.title)
-        context = dict(list(context.items()) + list(context_mixin.items()))
+        # context = dict(list(context.items()) + list(context_mixin.items()))
+        context.update(context_mixin)
 
         if request.POST.get('delete'):
             obj_post.delete()
@@ -91,7 +96,8 @@ class Profile(LoginRequiredMixin, DataMixin, ListView):
         context_mixin['follows'] = len(get_folowers(context['user']))
         context_mixin['user_images'] = Image.objects.filter(user=self.request.user.pk).order_by('-id')
         context_mixin['user_images_count'] = len(context_mixin['user_images'])
-        return dict(list(context.items()) + list(context_mixin.items()))
+        context.update(context_mixin)
+        return context
 
 
 class ChangeProfile(LoginRequiredMixin, DataMixin, View):
@@ -115,18 +121,18 @@ class ChangeProfile(LoginRequiredMixin, DataMixin, View):
 
     def post(self, request):
         settings_exists = get_object_or_404(User, pk=request.user.pk)
-        settings_form = ChangeProfileForm(request.POST, request.FILES, instance=settings_exists)
+        settings_form = self.post_form(request.POST, request.FILES, instance=settings_exists)
+        user = request.user
+        context = self.get_user_context()
+        context['form'] = settings_form
+        context['title'] = 'Редктирование профиля'
+        context['image'] = user.avatar
         if settings_form.is_valid():
             settings_form.save_with_slug()
             return redirect('user')
         else:
-            settings_form = ChangeProfileForm(request.POST, request.FILES)
-            user = request.user
-            context = self.get_user_context()
+            settings_form = self.post_form(request.POST, request.FILES)
             context['form'] = settings_form
-            context['title'] = 'Редктирование профиля'
-            context['image'] = user.avatar
-
         return render(request, self.template_name, context=context)
 
 
@@ -175,7 +181,8 @@ class ContactFormView(DataMixin, FormView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Обратная связь')
-        return dict(list(context.items()) + list(c_def.items()))
+        context.update(c_def)
+        return context
 
     def form_valid(self, form):
         send_message(form.cleaned_data['name'], form.cleaned_data['email'], form.cleaned_data['content'])
@@ -186,12 +193,11 @@ class LoginUser(DataMixin, LoginView):
     form_class = LoginForm
     template_name = 'registration/login.html'
 
-    def get(self, request):
-        context = self.get_user_context()
-        context['title'] = 'Авторизация'
-        context['form'] = self.form_class
-
-        return render(request, self.template_name, context)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title="Авторизация")
+        context.update(c_def)
+        return context
 
 
 class RegisterUser(DataMixin, View):
@@ -270,34 +276,102 @@ class EmailVerify(View):
         return user
 
 
-class AddLikeView(View):
-    def post(self, request, *args, **kwargs):
-        post_id = int(request.POST.get('post_id'))
+def ajax_add_follower(request):
+    if request.is_ajax():
+        user_id = int(request.POST.get('user_id'))
+        foreign_user_id = int(request.POST.get('foreign_user_id'))
+        data = {
+            'added': True,
+            'user_id': user_id,
+            'foreign_user_id': foreign_user_id
+        }
+        p_user = User.objects.get(id=user_id)
+        f_user = User.objects.get(id=foreign_user_id)
+        follow_inst = None
+        for user in f_user.follows.all():
+            if user.id == user_id:
+                follow_inst = user
+        print(follow_inst)
         try:
-            user_id = int(request.POST.get('user_id'))
+            f_user.objects.filter(follows__id=p_user.id)
         except Exception as e:
-            return redirect('login')
-        url_form = request.POST.get('url_form')
+            print(f_user.follows.all())
+            f_user.follows.add(p_user)
+            print(f_user.follows.all())
+        return JsonResponse(data)
 
-        user_inst = User.objects.get(id=user_id)
+
+def ajax_remove_follower(request):
+    if request.is_ajax():
+        user_id = int(request.POST.get('user_id'))
+        foreign_user_id = int(request.POST.get('foreign_user_id'))
+        data = {
+            'removed': True,
+            'user_id': user_id,
+            'foreign_user_id': foreign_user_id
+        }
+        f_user = User.objects.get(id=foreign_user_id)
+        f_user.follows.remove(User.objects.get(id=user_id))
+        return JsonResponse(data)
+
+
+def api_follow_info(request, user_id, foreign_user_id):
+    p_user_f = User.objects.get(id=user_id).follows.all().count()
+    f_user_f = User.objects.get(id=foreign_user_id).follows.all().count()
+    user = User.objects.filter(id=request.user.id).values('id', 'username')
+    f_user = User.objects.filter(id=user_id).values('id', 'username')
+    response_list = []
+    response_list.append({'follows_count': p_user_f})
+    response_list.append({'followers_count': f_user_f})
+    response_list.append({'user_that_followed': list(user)})
+    response_list.append({'user_followed_by': list(f_user)})
+    return JsonResponse(response_list, safe=False)
+
+
+def ajax_add_like(request):
+    if request.is_ajax():
+        post_id = int(request.POST.get('post_id'))
+        user_id = int(request.POST.get('user_id'))
+        data = {
+            'added': True,
+            'post_id': post_id,
+            'user_id': user_id
+        }
         post_inst = Post.objects.get(id=post_id)
+        user_inst = User.objects.get(id=user_id)
+
         try:
             like_inst = Like.objects.get(post=post_inst, liked_by=user_inst)
         except Exception as e:
             like = Like(post=post_inst, liked_by=user_inst, like=True)
             like.save()
-        return redirect(url_form)
+        return JsonResponse(data)
 
 
-class RemoveLikeView(View):
-    def post(self, request, *args, **kwargs):
+def ajax_remove_like(request):
+    if request.is_ajax():
+        post_id = int(request.POST.get('post_id'))
+        user_id = int(request.POST.get('user_id'))
         likes_id = int(request.POST.get('likes_id'))
-        url_form = request.POST.get('url_form')
-
+        data = {
+            'removed': True,
+            'post_id': post_id,
+            'user_id': user_id,
+            'likes_id': likes_id
+        }
         like = Like.objects.get(id=likes_id)
         like.delete()
+        return JsonResponse(data)
 
-        return redirect(url_form)
+
+def api_like_info(request, post_id):
+    post = Post.objects.filter(id=post_id).annotate(likes_count=Count('like')).values('likes_count')
+    likes = Like.objects.filter(post=post_id, liked_by=request.user.id).values('id', 'liked_by', 'like')
+    response_list = []
+    response_list.extend(post)
+    response_list.append({'likes_from_users': list(likes)})
+
+    return JsonResponse(response_list, safe=False)
 
 
 class Followers(DataMixin, DetailView):
@@ -309,7 +383,8 @@ class Followers(DataMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context_mixin = self.get_user_context(title="Подписчики")
         context_mixin['followers'] = context['user'].follows.all()
-        return dict(list(context.items()) + list(context_mixin.items()))
+        context.update(context_mixin)
+        return context
 
 
 class Follows(DataMixin, DetailView):
@@ -321,7 +396,8 @@ class Follows(DataMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context_mixin = self.get_user_context(title="Подписан")
         context_mixin['follows'] = get_folowers(context['user'])
-        return dict(list(context.items()) + list(context_mixin.items()))
+        context.update(context_mixin)
+        return context
 
 
 class ForeignProfile(LoginRequiredMixin, DataMixin, View):
@@ -338,8 +414,7 @@ class ForeignProfile(LoginRequiredMixin, DataMixin, View):
         context_mixin['follows'] = len(get_folowers(context_mixin['foreign_user']))
         context_mixin['user_images'] = Image.objects.filter(user=context_mixin['foreign_user'].pk).order_by('-id')
         context_mixin['user_images_count'] = len(context_mixin['user_images'])
-
-        context = dict(list(context.items()) + list(context_mixin.items()))
+        context.update(context_mixin)
         return render(request, self.template_name, context=context)
 
     def post(self, request, user_slug):
@@ -347,17 +422,14 @@ class ForeignProfile(LoginRequiredMixin, DataMixin, View):
         context['user'] = request.user
         sub = request.POST.get('subscribe')
         unsub = request.POST.get('unsubscribe')
-
-
-
         context_mixin = self.get_user_context(title=context['user'])
         context_mixin['foreign_user'] = User.objects.get(slug=user_slug)
         context_mixin['followers'] = context_mixin['foreign_user'].follows.all().count()
         context_mixin['follows'] = len(get_folowers(context_mixin['foreign_user']))
         context_mixin['user_images'] = Image.objects.filter(user=context_mixin['foreign_user'].pk).order_by('-id')
         context_mixin['user_images_count'] = len(context_mixin['user_images'])
-
-        context = dict(list(context.items()) + list(context_mixin.items()))
+        context.update(context_mixin)
+        # context = dict(list(context.items()) + list(context_mixin.items()))
         if sub is not None:
             subscribe(request, user_slug)
             return redirect('foreign_profile', user_slug=user_slug)
@@ -374,6 +446,35 @@ def pageNotFound(request, exception):
 
 def serverError(request):
     return HttpResponseServerError("<h1>Ошибка сервера</h1>")
+
+# class AddLikeView(View):
+#     def post(self, request, *args, **kwargs):
+#         post_id = int(request.POST.get('post_id'))
+#         try:
+#             user_id = int(request.POST.get('user_id'))
+#         except Exception as e:
+#             return redirect('login')
+#         url_form = request.POST.get('url_form')
+#
+#         user_inst = User.objects.get(id=user_id)
+#         post_inst = Post.objects.get(id=post_id)
+#         try:
+#             like_inst = Like.objects.get(post=post_inst, liked_by=user_inst)
+#         except Exception as e:
+#             like = Like(post=post_inst, liked_by=user_inst, like=True)
+#             like.save()
+#         return redirect(url_form)
+#
+#
+# class RemoveLikeView(View):
+#     def post(self, request, *args, **kwargs):
+#         likes_id = int(request.POST.get('likes_id'))
+#         url_form = request.POST.get('url_form')
+#
+#         like = Like.objects.get(id=likes_id)
+#         like.delete()
+#
+#         return redirect(url_form)
 
 # def index(request):
 #     posts = Post.objects.all()
