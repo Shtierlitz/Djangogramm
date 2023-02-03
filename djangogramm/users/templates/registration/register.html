@@ -1,4 +1,5 @@
 {% extends 'users/base.html' %}
+{% load account socialaccount %}
 
 {% block content %}
     <div class="container py-5 h-100">
@@ -61,7 +62,6 @@
                             <div class="form-error">{{ form.password2.errors }}</div>
                         </div>
                         <br>
-
                         <div class="form-group">
                             <div class="col-md-12 text-right">
                                 <button type="submit" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
@@ -71,10 +71,27 @@
                             </div>
                         </div>
                         <br>
+                        <div class="row">
+                            <div class="col-sm-4 social-buttons">
+
+                                <a class="btn btn-block btn-social btn-google" style="padding-left: 0" href="{% provider_login_url "google" %}">
+                                    <span class="fa fa-google"></span> Sign in with Google
+                                </a>
+                                <br>
+                                <a class="btn btn-block btn-social btn-github" style="padding-left: 0" href="{% provider_login_url "github" %}">
+                                    <span class="fa fa-github"></span> Sign in with GitHub
+                                </a>
+
+                            </div>
+                        </div>
+                        <br>
+
+                        <p class="text-inverse text-center">Уже есть аккаунт? <a
+                                href="{% url 'login' %}" data-abc="true">Войти</a></p>
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
-
 {% endblock %}
