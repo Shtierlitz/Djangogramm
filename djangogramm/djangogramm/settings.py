@@ -186,7 +186,7 @@ except ImportError:
     from .prod_settings import *
 
 if 'test' not in sys.argv:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
     CLOUDINARY_STORAGE = {
         'CLOUD_NAME': env("CLOUD_NAME"),
@@ -206,5 +206,5 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 ACCOUNT_SIGNUP_REDIRECT_URL = "user"
-
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 

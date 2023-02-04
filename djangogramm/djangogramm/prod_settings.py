@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', '35.228.217.110', 'foxstudent101801-djangogramm.pp.ua']
 
 DATABASES = {
     'default': {

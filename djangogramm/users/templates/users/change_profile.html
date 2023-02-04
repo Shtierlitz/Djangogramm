@@ -27,7 +27,7 @@
                                    for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
                             <div class="col-md-9">
                                 <input id="username" name="username" type="text"
-                                       placeholder="{{ form.initial.username }}"
+                                       placeholder="Никнейм..."
                                        class="form-control">
                             </div>
                             <div class="form-error">{{ form.username.errors }}</div>
@@ -39,7 +39,7 @@
                                    for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
                             <div class="col-md-9">
                                 <input id="first_name" name="first_name" type="text"
-                                       placeholder="{{ form.initial.first_name }}"
+                                       placeholder="Имя..."
                                        class="form-control">
                             </div>
                             <div class="form-error">{{ form.first_name.errors }}</div>
@@ -51,7 +51,7 @@
                                    for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
                             <div class="col-md-9">
                                 <input id="last_name" name="last_name" type="text"
-                                       placeholder="{{ form.initial.last_name }}"
+                                       placeholder="Фамилия..."
                                        class="form-control">
                             </div>
                             <div class="form-error">{{ form.last_name.errors }}</div>
@@ -68,7 +68,7 @@
                                    for="{{ form.about.id_for_label }}">{{ form.about.label }}: </label>
                             <div class="col-md-9">
                                     <textarea class="form-control" id="text" name="about"
-                                              placeholder="{{ form.initial.about }}" rows="5"></textarea>
+                                              placeholder="О пользователе..." rows="5"></textarea>
                             </div>
                             <div class="form-error">{{ form.about.errors }}</div>
                         </div>

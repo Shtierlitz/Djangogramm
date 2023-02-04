@@ -9,6 +9,7 @@ from django.views import View
 from django.views.generic import ListView, DetailView, FormView
 from django.contrib.auth import login
 from django.db.models import Count
+from django.contrib.sites.models import Site
 
 from users.forms import *
 from .utils import *
