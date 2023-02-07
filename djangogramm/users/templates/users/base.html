@@ -29,6 +29,7 @@ minimum-scale=0.25"/>
                             <a class="nav-link active" aria-current="page" href="{% url m.url_name %}">{{ m.title }}</a>
                         </li>
                     {% endfor %}
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="https://shtierlitz.github.io/CV/">Резюме разработчика...</a></li>
                 </ul>
                 {% if search %}
                     <form class="d-flex" action="{% url 'home' %}">
