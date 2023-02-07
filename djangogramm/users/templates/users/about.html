@@ -3,41 +3,77 @@
 {% block content %}
     <div class="about-section paddingTB60">
         <div class="container">
-            <div class="row">
-                <div class="col-md-7 col-sm-6">
-                    <div class="about-title clearfix">
-                        <h1>{{ title }} <span>Djangogramm</span></h1>
+            <div class="card-group">
+                <div class="card">
+                    <div class="card-body">
+                        <h1 class="card-title">{{ title }} <span style="color: #0ed25f">Djangogramm</span></h1>
                         <h3>Сайт разработан как учебный проект проходя курсы FoxMinded </h3>
-                        <p class="about-paddingB">Задания:</p>
-                        <p>Разработать Django проект.</p>
-                        <p>Создать модели Пользоветелей, фотографий и т.д.</p>
-                        <p>Добавить представления и пути</p>
-                        <p>Добавить функционал сохранения фотографий и создания превью</p>
-                        <p>Добавить функционал лайков и дислайков</p>
-                        <p>Добавить функционал тегов</p>
-                        <p>Заполнить исскуственными даннами базу данных и сгенерировать миграции</p>
-                        <p>Разместить сайт на сервере</p>
-                        <p>Покрыть проект тестами</p>
-                        <div class="about-icons">
-                            <ul>
-                                <li><a href="https://www.facebook.com/profile.php?id=100009034396916"><i id="social-fb"
-                                                                                                         class="fa fa-facebook-square fa-3x social"></i></a>
-                                </li>
-                                <li><a href="{% url 'contact' %}"><i id="social-em"
-                                                                     class="fa fa-envelope-square fa-3x social"></i></a>
-                                </li>
-                            </ul>
-
-
-                        </div>
+                        <p class="about-paddingB"><strong>Выполненные задачи:</strong></p>
+                        <p class="card-text">Разработан Django проект.</p>
+                        <p class="card-text">Созданы модели Пользоветелей, фотографий и т.д.</p>
+                        <p class="card-text">Добавлены представления и пути</p>
+                        <p class="card-text">Добавлен функционал сохранения фотографий и создания превью</p>
+                        <p class="card-text">Добавлен функционал лайков и дислайков</p>
+                        <p class="card-text">Добавлен функционал тегов</p>
+                        <p class="card-text">База данных заполнена искусственными даннами и сгенерированны миграции</p>
+                        <p class="card-text">Добавлен Bootstrap для придания лучшего вида</p>
+                        <p class="card-text">Добавлен фунакионал подпсок и подписчиков</p>
+                        <p class="card-text">Добавлен сторонний сервис для хранения фотографий (Cloudinary)</p>
+                        <p class="card-text">Использованы инструменты Webpack</p>
+                        <p class="card-text">Настроен Webpack под Bootstrap</p>
+                        <p class="card-text">Добавлен Ajax функционал (Лайки и подписки)</p>
+                        <p class="card-text">Проект модифицирован под регистрацию и логирование через сторонние сервисы
+                            (Google, GitHub)</p>
+                        <p class="card-text">Сайт размещен на сервере (Google Ubuntu 20.0)</p>
+                        <p class="card-text">Проект покрыт тестами</p>
                     </div>
-                    <div class="col-md-5 col-sm-6">
-                        <div class="about-img">
-                            <img src="https://devitems.com/preview/appmom/img/mobile/2.png" alt="">
-                        </div>
+                    <div class="card-footer">
+                        <small class="text-muted">Ссылка на проект на GitHub: <a
+                                href="https://github.com/Shtierlitz/task_12_create_basic_application">DjangoGramm</a>
+                        </small>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h1 class="card-title">About <span style="color: #0ed25f">Djangogramm</span></h1>
+                        <h3>The site was developed as a training project During the course Python-Web FoxMinded</h3>
+                        <p class="about-paddingB"><strong>Tasks:</strong></p>
+                        <p class="card-text">Set up environment, tools(virtualenv, IDE, etc)</p>
+                        <p class="card-text">Create models: User, Photo etc.</p>
+                        <p class="card-text">Add views and routes </p>
+                        <p class="card-text">Add functional of storing photos and generate previews. </p>
+                        <p class="card-text">Add likes and dislikes entity</p>
+                        <p class="card-text">Add tag functionality</p>
+                        <p class="card-text">Fill a fake data into the database, generate migrations, etc.</p>
+                        <p class="card-text">Use bootstrap for make a pretty view, etc</p>
+                        <p class="card-text">Add following and follower entity</p>
+                        <p class="card-text">Use third party service for storing images (Cloudinary)</p>
+                        <p class="card-text">Использованы инструменты Webpack</p>
+                        <p class="card-text">Configure webpack for bootstrap </p>
+                        <p class="card-text">Add functionality like Ajax etc. (likes and follows)</p>
+                        <p class="card-text">Modify the application to use third-party services for login. There are a few popular services:
+                            (Google, GitHub)</p>
+                        <p class="card-text">Deploy the code to the server. (Google Ubuntu 20.0)</p>
+                        <p class="card-text">The project is covered with tests using Unittest module or py.test</p>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">Link to the project on GitHub: <a
+                                href="https://github.com/Shtierlitz/task_12_create_basic_application">DjangoGramm</a>
+                        </small>
                     </div>
                 </div>
             </div>
+            <div class="about-icons">
+                <ul>
+                    <li><a href="https://www.facebook.com/profile.php?id=100009034396916"><i id="social-fb"
+                                                                                             class="fa fa-facebook-square fa-3x social"></i></a>
+                    </li>
+                    <li><a href="{% url 'contact' %}"><i id="social-em"
+                                                         class="fa fa-envelope-square fa-3x social"></i></a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
+
 {% endblock %}
