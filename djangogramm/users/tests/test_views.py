@@ -1,8 +1,14 @@
+import time
+
 from django.contrib.auth import get_user_model
 import tempfile
 import shutil
+
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
+
+from users.forms import ImageForm
 from users.utils import get_d_m_y
 
 from users.models import Post, Tag, Like, Image
@@ -23,12 +29,12 @@ class TestViews(TestCase):
         super().tearDownClass()
 
     @staticmethod
-    def get_image_file(name='test.png', ext='png', size=(50, 50), color=(256, 0, 0)):
-        file_obj = BytesIO()
-        image = Im.new("RGB", size=size, color=color)
-        image.save(file_obj, ext)
-        file_obj.seek(0)
-        return File(file_obj, name=name)
+    def get_image_file(name='test.png', file_format='png'):
+        file = BytesIO()
+        image = Im.new('RGBA', size=(50, 50), color=(155, 0, 0))
+        image.save(file, file_format)
+        file.seek(0)
+        return SimpleUploadedFile(name, file.getvalue(), content_type=f'image/{file_format}')
 
     def setUp(self):
         self.client = Client()
@@ -109,8 +115,9 @@ class TestViews(TestCase):
         assert response.headers['Content-Type'] == 'text/html; charset=utf-8'
         self.assertTemplateUsed(response, 'users/addpage.html')
 
+
     def test_AddPage_post(self):
-        self.image = self.get_image_file(name='test3.png')
+        self.image = [self.get_image_file(name=f'test{i}.png') for i in range(1, 4)]
         response = self.client.post(reverse('add_page'), {
             'title': 'test_title',
             'text': 'test_text',
@@ -119,7 +126,7 @@ class TestViews(TestCase):
         })
 
         post = Post.objects.get(pk=2)
-        image = Image.objects.get(post=2)
+        image = Image.objects.last()
         tag = Tag.objects.get(pk=1)
 
         self.assertEqual(response.status_code, 302)
@@ -193,8 +200,8 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_AddLikeView_post(self):
-        response = self.client.post(reverse('add'), data=dict(post_id=1, user_id=1, url_form='home'))
-        self.assertEqual(response.status_code, 302)
+        response = self.client.post(reverse('add-ajax'), data=dict(post_id=1, user_id=1, url_form='home'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(len(Like.objects.all()), 1)
 
     def test_RemoveLikeView_post(self):
@@ -202,8 +209,8 @@ class TestViews(TestCase):
             post=Post.objects.get(pk=1),
             liked_by=User.objects.get(pk=1)
         )
-        response = self.client.post(reverse('remove'), data=dict(likes_id=1, like=True, url_form='home'))
-        self.assertEqual(response.status_code, 302)
+        response = self.client.post(reverse('remove-ajax'), data=dict(post_id=1, likes_id=1, user_id=1, like=True, url_form='home'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(len(Like.objects.all()), 0)
 
     def test_Followers(self):

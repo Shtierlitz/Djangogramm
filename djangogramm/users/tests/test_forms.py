@@ -1,13 +1,14 @@
 import shutil
 import tempfile
 from django.contrib.auth import get_user_model
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
+from django.urls import reverse
 
 from users.forms import AddPostForm, ImageForm, TagForm, ChangeProfileForm, RegisterForm, LoginForm, ContactForm
 from django.test import SimpleTestCase, override_settings, TestCase
 from io import BytesIO
 from PIL import Image as Im
-from django.core.files.base import File
+from django.test import RequestFactory
 
 MEDIA_ROOT = tempfile.mkdtemp()
 User = get_user_model()
@@ -21,12 +22,12 @@ class TestForms(TestCase):
         super().tearDownClass()
 
     @staticmethod
-    def get_image_file(name='test.png', ext='png', size=(50, 50), color=(256, 0, 0)):
-        file_obj = BytesIO()
-        image = Im.new("RGB", size=size, color=color)
-        image.save(file_obj, ext)
-        file_obj.seek(0)
-        return File(file_obj, name=name)
+    def get_image_file(name='test.png', file_format='png'):
+        file = BytesIO()
+        image = Im.new('RGBA', size=(50, 50), color=(155, 0, 0))
+        image.save(file, file_format)
+        file.seek(0)
+        return SimpleUploadedFile(name, file.getvalue(), content_type=f'image/{file_format}')
 
     def test_AddPostForm_valid_data(self):
         form = AddPostForm(data={
@@ -172,13 +173,20 @@ class TestForms(TestCase):
         self.assertEquals(len(form.errors), 3)
 
     def test_ImageForm(self):
-        self.image = self.get_image_file('test.png')
+        # Создаем фабрику запросов
+        factory = RequestFactory()
+        # Создаем запрос
+        request = factory.post(reverse('add_page'))
 
-        form = ImageForm(data={'image': 'test.png'}, files={
-            'image': self.image
-        })
+        # Создаем список файлов
+        image_files = [self.get_image_file(f'test{i}.png') for i in range(1, 4)]
+        request.FILES.setlist('image', image_files)
+
+        # Создаем форму с передачей запроса
+        form = ImageForm(request=request, files=request.FILES)
         self.assertTrue(form.is_valid())
 
+    #
     def test_ImageForm_no_data(self):
         form = ImageForm(data={})
         self.assertFalse(form.is_valid())

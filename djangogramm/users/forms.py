@@ -59,21 +59,20 @@ class TagForm(forms.Form):
 
 
 class ImageForm(forms.Form):
-    image = forms.ImageField(widget=widgets.FileInput(attrs={'multiple': 'multiple'}))
+    image = forms.ImageField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
 
     def __init__(self, *args, **kwargs):
         if 'request' in kwargs:
             self.request = kwargs.pop('request')
         super(ImageForm, self).__init__(*args, **kwargs)
 
-    if 'test' not in sys.argv:
-        def clean_image(self):
-            # Остаются только картинки
-            image = [i for i in self.request.FILES.getlist('image') if 'image' in i.content_type]
-            # Если среди загруженных файлов картинок нет, то исключение
-            if len(image) == 0:
-                raise forms.ValidationError(u'Not found uploaded photos.')
-            return image
+    def clean_image(self):
+        # Остаются только картинки
+        image = [i for i in self.request.FILES.getlist('image') if 'image' in i.content_type]
+        # Если среди загруженных файлов картинок нет, то исключение
+        if len(image) == 0:
+            raise forms.ValidationError(u'Not found uploaded photos.')
+        return image
 
     def save_for(self, post, user):
         for image in self.cleaned_data['image']:
